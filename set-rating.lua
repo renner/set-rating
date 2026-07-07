@@ -104,8 +104,8 @@ for _, path in ipairs(files) do
     rating,
     shell_escape(target)
   )
-  local success = os.execute(cmd)
-  if success then
+  local ok, _, code = os.execute(cmd)
+  if ok and code == 0 then
     ok_count = ok_count + 1
   else
     fail_count = fail_count + 1
