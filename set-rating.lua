@@ -1,27 +1,23 @@
 #!/usr/bin/env lua
 --[[
-  Nautilus script: Set star rating (XMP:Rating) on selected image(s)
+  Set Rating – Nautilus right-click script
+  Writes XMP:Rating (0-5, -1=reject) into selected image(s) via exiftool.
+
+  If a darktable sidecar (<file>.<ext>.xmp) exists the rating goes there;
+  otherwise it is written directly into the image file.
+  Requires: lua5.3, exiftool, zenity
+    sudo apt install lua5.3 libimage-exiftool-perl zenity
 
   Install:
-    1. Save this file as ~/.local/share/nautilus/scripts/Set Rating.lua
-    2. chmod +x "~/.local/share/nautilus/scripts/Set Rating.lua"
-    3. Requires: lua5.3 (or similar), exiftool, zenity
-       sudo apt install lua5.3 libimage-exiftool-perl zenity
+    cp set-rating.lua ~/.local/share/nautilus/scripts/"Set Rating.lua"
+    chmod +x ~/.local/share/nautilus/scripts/"Set Rating.lua"
 
-  Usage:
-    Right-click one or more images in Nautilus -> Scripts -> Set Rating.lua
-    A dialog will ask for a rating 0-5 (or -1 to reject).
-    darktable will pick up the change next time it reads/re-imports the file
-    (Preferences -> Storage -> "look for updated xmp files", or
-    right-click -> "read metadata from image" in lighttable).
-
-  Sidecar handling:
-    If darktable has already created an XMP sidecar for the selected image
-    (e.g. "IMG_0001.CR3.xmp" next to "IMG_0001.CR3"), the rating is written
-    to the sidecar instead of the original file. darktable reads ratings
-    from the sidecar preferentially, so writing directly to the RAW/JPEG
-    when a sidecar already exists would otherwise be ignored or overwritten
-    the next time darktable saves its own sidecar.
+  darktable:
+    darktable keeps metadata in its database and ignores external XMP
+    changes while running. To pick up the new rating:
+      Preferences -> Storage -> enable "look for updated xmp files on
+      startup", then restart darktable.  A dialog will offer to reload
+      the modified sidecars into the database.
 --]]
 
 local function get_selected_files()
