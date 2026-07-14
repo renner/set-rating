@@ -90,38 +90,27 @@ if exiftool_check ~= 0 then
   os.exit(1)
 end
 
-local ok_count = 0
-local fail_count = 0
 local sidecar_count = 0
+local targets = {}
 
 for _, path in ipairs(files) do
   local sidecar = find_sidecar(path)
-  local target = sidecar or path
+  table.insert(targets, shell_escape(sidecar or path))
   if sidecar then
     sidecar_count = sidecar_count + 1
   end
+end
 
-  -- -overwrite_original avoids exiftool leaving *_original backup copies
-  local cmd = string.format(
-    "exiftool -overwrite_original -XMP:Rating=%d %s",
-    rating,
-    shell_escape(target)
-  )
-  local ok, _, code = os.execute(cmd)
-  if ok and code == 0 then
-    ok_count = ok_count + 1
-  else
-    fail_count = fail_count + 1
+local cmd = "exiftool -overwrite_original -XMP:Rating=" .. rating .. " "
+         .. table.concat(targets, " ")
+local ok, _, code = os.execute(cmd)
+
+if ok and code == 0 then
+  local suffix = ""
+  if sidecar_count > 0 then
+    suffix = string.format(" (%d via .xmp sidecar)", sidecar_count)
   end
-end
-
-local suffix = ""
-if sidecar_count > 0 then
-  suffix = string.format(" (%d via .xmp sidecar)", sidecar_count)
-end
-
-if fail_count == 0 then
-  notify(string.format("Set rating %d on %d file(s)%s.", rating, ok_count, suffix))
+  notify(string.format("Set rating %d on %d file(s)%s.", rating, #files, suffix))
 else
-  notify(string.format("Rating set on %d file(s)%s, %d failed.", ok_count, suffix, fail_count))
+  notify(string.format("Rating failed on %d file(s).", #files))
 end
