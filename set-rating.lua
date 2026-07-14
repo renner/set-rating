@@ -84,6 +84,12 @@ if rating == nil then
   os.exit(0)
 end
 
+local exiftool_check = os.execute("which exiftool >/dev/null 2>/dev/null")
+if exiftool_check ~= 0 then
+  notify("exiftool not found. Install: sudo zypper install exiftool")
+  os.exit(1)
+end
+
 local ok_count = 0
 local fail_count = 0
 local sidecar_count = 0
