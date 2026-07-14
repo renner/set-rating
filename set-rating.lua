@@ -1,4 +1,5 @@
 #!/usr/bin/env lua
+-- SPDX-License-Identifier: MIT
 --[[
   Set Rating – Nautilus right-click script
   Writes XMP:Rating (0-5, -1=reject) into selected image(s) via exiftool.
