@@ -2,7 +2,7 @@
 -- SPDX-License-Identifier: MIT
 --[[
   Set Rating – Nautilus right-click script
-  Writes XMP:Rating (0-5, -1=reject) into selected image(s) via exiftool.
+  Writes XMP:Rating (0=unrated, 1-5) into selected image(s) via exiftool.
 
   If a darktable sidecar (<file>.<ext>.xmp) exists the rating goes there;
   otherwise it is written directly into the image file.
@@ -39,8 +39,8 @@ end
 
 local function ask_rating()
   local handle = io.popen(
-    "zenity --scale --title='Set Rating' --text='Star rating (0-5, or -1 to reject):' " ..
-    "--min-value=-1 --max-value=5 --value=0 --step=1 2>/dev/null"
+    "zenity --scale --title='Set Rating' --text='Star rating (0=unrated, 1-5):' " ..
+    "--min-value=0 --max-value=5 --value=0 --step=1 2>/dev/null"
   )
   local result = handle:read("*a")
   handle:close()
