@@ -37,10 +37,10 @@ local function shell_escape(s)
   return "'" .. s:gsub("'", "'\\''") .. "'"
 end
 
-local function ask_rating()
+local function ask_rating(default)
   local handle = io.popen(
     "zenity --scale --title='Set Rating' --text='Star rating (0=unrated, 1-5):' " ..
-    "--min-value=0 --max-value=5 --value=0 --step=1 2>/dev/null"
+    "--min-value=0 --max-value=5 --value=" .. (default or 0) .. " --step=1 2>/dev/null"
   )
   local result = handle:read("*a")
   handle:close()
@@ -78,16 +78,35 @@ if #files == 0 then
   os.exit(1)
 end
 
-local rating = ask_rating()
-if rating == nil then
-  -- user cancelled the dialog
-  os.exit(0)
-end
-
 local exiftool_check = os.execute("which exiftool >/dev/null 2>/dev/null")
 if exiftool_check ~= 0 then
   notify("exiftool not found. Install: sudo zypper install exiftool")
   os.exit(1)
+end
+
+local default = 0
+local current = nil
+local consistent = true
+for _, path in ipairs(files) do
+  local sidecar = find_sidecar(path)
+  local target = sidecar or path
+  local h = io.popen("exiftool -b -XMP:Rating " .. shell_escape(target))
+  local r = tonumber(h:read("*a"))
+  h:close()
+  if not current then
+    current = r
+  elseif r ~= current then
+    consistent = false
+    break
+  end
+end
+if consistent and current then
+  default = current
+end
+
+local rating = ask_rating(default)
+if rating == nil then
+  os.exit(0)
 end
 
 local sidecar_count = 0
