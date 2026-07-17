@@ -78,8 +78,8 @@ if #files == 0 then
   os.exit(1)
 end
 
-local exiftool_check = os.execute("which exiftool >/dev/null 2>/dev/null")
-if exiftool_check ~= 0 then
+local ok, _, code = os.execute("exiftool -ver >/dev/null 2>/dev/null")
+if not (ok and code == 0) then
   notify("exiftool not found. Install: sudo zypper install exiftool")
   os.exit(1)
 end
